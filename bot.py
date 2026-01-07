@@ -2,6 +2,8 @@ import telebot
 import requests
 import urllib.parse
 import os
+from threading import Thread
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # ====== التوكنات من Environment Variables ======
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -9,6 +11,23 @@ CLASH_API_KEY = os.getenv("CLASH_API_KEY")
 # =============================
 
 bot = telebot.TeleBot(BOT_TOKEN)
+
+# ====== HTTP Server للـ Health Check ======
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+    def log_message(self, format, *args):
+        pass
+
+def run_health_server():
+    server = HTTPServer(('0.0.0.0', 8080), HealthHandler)
+    server.serve_forever()
+
+# تشغيل الـ Health Server في thread منفصل
+Thread(target=run_health_server, daemon=True).start()
+# ==========================================
 
 # رسالة الترحيب
 @bot.message_handler(commands=['start'])
