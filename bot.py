@@ -79,6 +79,7 @@ def get_player_stats(player_tag):
     if response.status_code == 200:
         return response.json()
     else:
+        print(f"Error: {response.status_code} - {response.text}")
         return None
 
 # تنسيق بيانات اللاعب
